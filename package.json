@@ -1,0 +1,49 @@
+{
+  "name": "studio-cluster",
+  "version": "0.0.1",
+  "description": "Cluster (rpc) plugin for studio",
+  "author": {
+    "name": "Erich Oliveira",
+    "url": "http://ericholiveira.com"
+  },
+  "keywords": [
+    "frp",
+    "functional",
+    "reactive",
+    "programming",
+    "actor",
+    "actors",
+    "async",
+    "akka",
+    "micro-services",
+    "micro-service",
+    "micro",
+    "service",
+    "studio",
+    "cluster",
+    "rpc",
+    "remote procedure call"
+  ],
+  "licenses": [
+    "MIT"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ericholiveira/studio-cluster.git"
+  },
+  "main": "./compiled/index.js",
+  "scripts": {
+    "test": "grunt all"
+  },
+  "readmeFilename": "README.md",
+  "devDependencies": {
+    "coffee-script": "1.8.0",
+    "grunt": "0.4.x",
+    "grunt-cli": "0.1.13",
+    "grunt-coffeelint": "0.0.13",
+    "grunt-contrib-coffee": "0.11.1",
+    "grunt-contrib-watch": "0.6.1",
+    "grunt-release": "0.7.0",
+    "studio": ">=0.10.3"
+  }
+}
