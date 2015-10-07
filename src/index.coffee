@@ -22,7 +22,6 @@ registerRemoteActor = (rpcPort,broadcastPort,server) ->
       if msg.action is destroyActorMessage
         remoteActors[msg.id]=remoteActors[msg.id].filter((info)->info.url != msg.address and info.port != msg.port)
       if msg.action is discoverActorMessage
-        console.log(discoverActorMessage)
         sendDiscoverResponse(rpcPort,broadcastPort,server)
     catch err
       ()->#DO nothing
@@ -35,16 +34,13 @@ removeActors = (url,port) ->
 sendDiscoverResponse = (rpcPort,broadcastPort,server)->
   address = server.address()
   ids = []
-  console.log(localActors)
   ids.push(id) for id of localActors when localActors[id]
-  console.log(ids)
   message = JSON.stringify({
     address : address.address
     port : rpcPort
     id : ids
     action : createActorMessage
   })
-  console.log(message)
   server.send(message,0,message.length, broadcastPort, BROADCAST_IP)
 sendMessage =(action,rpcPort,broadcastPort,actor,server)->
   address = server.address()
