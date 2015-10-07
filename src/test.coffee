@@ -11,6 +11,6 @@ new Studio.Actor({
     console.log('ping')
     setInterval(()->
       console.log('try')
-      self.send('meuId2').then((res)->console.log(res)).catch((err)->console.log(err))
+      self.send('meuId2', 'meuId').then((res)->console.log(res)).catch((err)->console.log('ERRO'))
     ,1000)
 }).process()

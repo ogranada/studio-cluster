@@ -5,6 +5,9 @@ console.log("rpcPort = #{rpcPort}")
 Studio.use(cluster(rpcPort))
 
 new Studio.Actor({
-  id: 'meuId2',
-  process: (message)->@send('meuId3', message)
+  id: 'meuId3',
+  watchPath:__filename,
+  process: (message)->
+    console.log(message)
+    'hello ' + message
 })
