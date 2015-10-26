@@ -3,6 +3,7 @@ grunt.loadNpmTasks('grunt-contrib-watch');
 grunt.loadNpmTasks('grunt-coffeelint');
 grunt.loadNpmTasks('grunt-contrib-coffee');
 grunt.loadNpmTasks('grunt-release');
+grunt.loadNpmTasks('grunt-mocha-test');
 grunt.initConfig({
 	coffeelint: {
 		app: ['src/**/*.coffee', '*.coffee'],
@@ -40,8 +41,17 @@ grunt.initConfig({
 			npm: true,
 			npmTag: "<%= version %>"
 		}
+	},
+	mochaTest: {
+		test: {
+			options: {
+				reporter: 'spec',
+				require: 'coffee-script/register'
+			},
+			src: ['test/**/*.coffee']
+		}
 	}
 });
-grunt.registerTask("all", ["coffeelint", "coffee"]);
+grunt.registerTask("all", ["coffeelint", "coffee","mochaTest"]);
 grunt.registerTask("default", ["all", "watch"]);
 grunt.registerTask("prod", ["all", "release"]);
