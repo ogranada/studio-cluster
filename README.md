@@ -38,6 +38,7 @@ Studio.use(studioCluster({rpcPort:10199}));
 
 var test1 = Studio('test1');
 Studio(function test2(){
+    //call remote service
     return test1().then(function(message){
         console.log(message);
     }).catch(function(err){
@@ -47,7 +48,6 @@ Studio(function test2(){
 
 
 var test2 =  Studio('test2');
-`
 
 setInterval(test2,1500);
-``
+```
