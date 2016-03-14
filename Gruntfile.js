@@ -1,57 +1,78 @@
 var grunt = require("grunt");
 grunt.loadNpmTasks('grunt-contrib-watch');
-grunt.loadNpmTasks('grunt-coffeelint');
-grunt.loadNpmTasks('grunt-contrib-coffee');
+grunt.loadNpmTasks('grunt-contrib-jshint');
 grunt.loadNpmTasks('grunt-release');
 grunt.loadNpmTasks('grunt-mocha-test');
+grunt.loadNpmTasks('grunt-istanbul');
+
 grunt.initConfig({
-	coffeelint: {
-		app: ['src/**/*.coffee', '*.coffee'],
-		options: {
-			'max_line_length': {
-				level: 'ignore'
-			}
-		}
-	},
 	watch: {
 		scripts: {
-			files: ['src/**/*.{coffee,js}', '*.{coffee,js}'],
+			files: ['src/**/*.js', '*.js', 'tests/*.js'
+			],
 			tasks: ['all'],
 			options: {
 				spawn: false
 			}
 		}
 	},
-	coffee: {
-		multiple: {
-			options: {
-				sourceMap: true,
-				sourceMapDir: 'compiled/maps/'
-			},
-			expand: true,
-			cwd: 'src',
-			src: '**/*.coffee',
-			dest: 'compiled/',
-			ext: '.js'
+	instrument: {
+		files: ['src/**/*.js','tests/**/*.js'],
+		options: {
+			lazy: false,
+			basePath: '.coverage'
 		}
 	},
-	release: {
-		options: {
-			bump: true,
-			npm: true,
-			npmTag: "<%= version %>"
+	jshint: {
+		all: ['src/**/*.js', '*.js', 'tests/**/*.js'],
+		options:{
+			esnext:true
 		}
 	},
 	mochaTest: {
 		test: {
 			options: {
 				reporter: 'spec',
-				require: 'coffee-script/register'
+				clearRequireCache:true
 			},
-			src: ['test/**/*.coffee']
+			src: ['tests/**/*.js']
+		},
+		cov: {
+			options: {
+				reporter: 'spec',
+				clearRequireCache:true
+			},
+			src: ['.coverage/tests/**/*.js']
+		}
+	},
+	storeCoverage: {
+		options: {
+			dir: '.coverage/reports'
+		}
+	},
+	makeReport: {
+		src: '.coverage/reports/**/*.json',
+		options: {
+			type: 'html',
+			dir: '.coverage/reports',
+			print: 'both'
+		}
+	},
+	release: {
+		options: {
+			bump: true,
+			npm: true,
+			changelog: 'CHANGELOG.md',
+			changelogText: '### <%= version %> - ' + grunt.template.today('yyyy-mm-dd') + '\n',
+			npmTag: "<%= version %>"
 		}
 	}
+
 });
-grunt.registerTask("all", ["coffeelint", "coffee","mochaTest"]);
+grunt.registerTask("cov-test", [ "instrument","mochaTest:cov", 'storeCoverage','makeReport']);
+grunt.registerTask("test", ["mochaTest:test"]);
+grunt.registerTask("coverage", ["jshint","cov-test"]);
+grunt.registerTask("all", ["jshint", "test"]);
 grunt.registerTask("default", ["all", "watch"]);
 grunt.registerTask("prod", ["all", "release"]);
+
