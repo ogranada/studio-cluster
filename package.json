@@ -1,10 +1,13 @@
 {
   "name": "studio-cluster",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Cluster (rpc) plugin for studio",
   "author": {
     "name": "Erich Oliveira",
     "url": "http://ericholiveira.com"
+  },
+  "scripts": {
+    "test": "grunt all"
   },
   "keywords": [
     "functional",
@@ -28,9 +31,6 @@
     "url": "https://github.com/ericholiveira/studio-cluster.git"
   },
   "main": "./src/index.js",
-  "scripts": {
-    "test": "grunt all"
-  },
   "readmeFilename": "README.md",
   "devDependencies": {
     "chai": "^3.4.1",
