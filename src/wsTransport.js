@@ -2,6 +2,7 @@ var WebSocketServer = require('websocket').server;
 var http = require('http');
 var isListening = false;
 var protocol = 'studio';
+var serializeError = require('serialize-error');
 var WebSocketClient = require('websocket').client;
 var uuid = require('node-uuid');
 var server = http.createServer(function (request, response){
@@ -75,16 +76,17 @@ module.exports = {
         if(!isListening) {
             isListening = true;
             server.listen(rpcPort, function(){});
-            wsServer = new WebSocketServer({httpServer: server,autoAcceptConnections: false});
+            wsServer = new WebSocketServer({httpServer: server,autoAcceptConnections: false,keepalive:true});
             wsServer.on('request',function (request){
                 var connection = request.accept(protocol, request.origin);
                 connection.on('message', function(message){
                     message = safeJsonParse(message.utf8Data);
-                    if(message.r){
+                    if(message && message.r){
                         refs[message.r] = refs[message.r] || Studio(message.r);
                         refs[message.r].apply(null,message.p).then(function(res){
                             connection.sendUTF(JSON.stringify({i:message.i, m:res,s:1}));
                         }).catch(function(err) {
+                            err = serializeError(err);
                             connection.sendUTF(JSON.stringify({i: message.i, m: err, s: 0}));
                         });
                     }
@@ -112,6 +114,12 @@ module.exports = {
         });
     },
     disconnectFunction:function(url,port){
+        connections[url+':'+port].then(function(client){
+            clearInterval(client._ping);
+            Object.keys(client._promises).forEach(function(k){
+                client._promises[k].reject(new Error('CLOSED'));
+            });
+        });
         connections[url+':'+port] = null;
     },
     onDisconnect:function(funk) {

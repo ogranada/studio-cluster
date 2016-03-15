@@ -93,11 +93,11 @@ module.exports = function(configuration){
             defaultTransport.onDisconnect(removeServices);
         });
         startPromise.then(sendMessage.bind(this,DISCOVER_SERVICES_MESSAGE,rpcPort,broadcastPort,null));
-        opt.onStart(function(serv,ref){
+        opt.onStart(function(serv){
             localServices[serv.id] = true;
             startPromise.then(sendMessage.bind(this,START_SERVICE_MESSAGE,rpcPort,broadcastPort,serv.id));
         });
-        opt.onStop(function(serv,ref){
+        opt.onStop(function(serv){
             localServices[serv.id] = false;
             startPromise.then(sendMessage.bind(this,STOP_SERVICE_MESSAGE,rpcPort,broadcastPort,serv.id));
         });
