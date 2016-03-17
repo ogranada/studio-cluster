@@ -32,7 +32,7 @@ Process 2:
 ```js
 var Studio = require('studio');
 
-var studioCluster =require('./src');// require('studio-cluster');`
+var studioCluster = require('studio-cluster');`
 // you only need to choose a rpcPort if your process are running in the same machine, then you need a port to each process
 Studio.use(studioCluster({rpcPort:10199}));
 
