@@ -1,0 +1,3 @@
+module.exports.START_SERVICE_MESSAGE = "START";
+module.exports.STOP_SERVICE_MESSAGE = "STOP";
+module.exports.DISCOVER_SERVICES_MESSAGE = "DISCOVER";
