@@ -24,6 +24,7 @@ var sendMessage =function(action,id,server){
 
 broadcastEmitter.start = function (Studio, opt) {
     if (!started) {
+        opt = opt || {};
         broadcastPort = opt.broadcastPort || 10121;
         rpcPort = opt.rpcPort;
         started = new Studio.promise(function (resolve, reject) {
@@ -43,7 +44,7 @@ broadcastEmitter.start = function (Studio, opt) {
                         broadcastEmitter.emit(msg.action,msg);
                     }
                 }catch(err){
-                    console.error(err);
+                    // nothing to do... ignore message
                 }
             });
         });

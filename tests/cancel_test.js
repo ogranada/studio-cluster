@@ -23,4 +23,8 @@ describe("Cancel Tests",function(){
             expect(error.message).to.equal('CLOSED');
         });
     });
+    it("must support kill child",function(){
+        //no tests just killing possible lost pids;
+        child.kill();
+    });
 });

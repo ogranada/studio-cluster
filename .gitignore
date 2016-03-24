@@ -1,6 +1,6 @@
 .idea/
 compiled/
 node_modules/
+.coverage/
 test1.js
-
 test2.js

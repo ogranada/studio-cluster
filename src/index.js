@@ -21,7 +21,7 @@ var removeServices = function(url,port){
 
 
 
-module.exports = function(configuration){
+var clusterPlugin = function(configuration){
     return function(opt,Studio){
         configuration = configuration || {};
         var rpcPort = configuration.rpcPort || 10120;
@@ -87,3 +87,8 @@ module.exports = function(configuration){
         });
     };
 };
+
+clusterPlugin.publisher={
+  broadcast : require('./publisher/broadcast')
+};
+module.exports = clusterPlugin;

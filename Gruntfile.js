@@ -44,12 +44,33 @@ grunt.initConfig({
 			},
 			src: ['tests/cancel_test.js']
 		},
+		testAll: {
+			options: {
+				reporter: 'spec',
+				clearRequireCache:true
+			},
+			src: ['tests/**/*_test.js','!tests/cancel_test.js','!tests/basic_test.js']
+		},
 		cov: {
 			options: {
 				reporter: 'spec',
 				clearRequireCache:true
 			},
-			src: ['.coverage/tests/**/*_test.js']
+			src: ['.coverage/tests/basic_test.js']
+		},
+		covCancel: {
+			options: {
+				reporter: 'spec',
+				clearRequireCache:true
+			},
+			src: ['.coverage/tests/cancel_test.js']
+		},
+		covAll: {
+			options: {
+				reporter: 'spec',
+				clearRequireCache:true
+			},
+			src: ['.coverage/tests/**/*_test.js','!.coverage/tests/cancel_test.js','!.coverage/tests/basic_test.js']
 		}
 	},
 	storeCoverage: {
@@ -74,8 +95,9 @@ grunt.initConfig({
 	}
 
 });
-grunt.registerTask("cov-test", [ "instrument","mochaTest:cov", 'storeCoverage','makeReport']);
-grunt.registerTask("test", ["mochaTest:test","mochaTest:testCancel"]);
+grunt.registerTask("cov-test", [ "instrument","mochaTest:cov","mochaTest:covCancel","mochaTest:covAll", 'storeCoverage',
+	'makeReport']);
+grunt.registerTask("test", ["mochaTest:test","mochaTest:testCancel","mochaTest:testAll"]);
 grunt.registerTask("coverage", ["jshint","cov-test"]);
 grunt.registerTask("all", ["jshint", "test"]);
 grunt.registerTask("default", ["all", "watch"]);

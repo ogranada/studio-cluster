@@ -22,6 +22,7 @@ describe("Basic Tests",function(){
         });
     });
     var child = exec('node ./tests/testOfBasicRemoteService.js');
+
     var senderService = Studio('sender');
     var senderWithErrorService = Studio('senderWithError');
     var senderSumService = Studio('senderSum');
@@ -47,5 +48,14 @@ describe("Basic Tests",function(){
         return senderSumService(3).then(function(result){
             expect(result).to.equal(6);
         });
+    });
+    it("must support dualCommunication",function(){
+        return Studio('dualCommunication')(4).then(function(result){
+            expect(result).to.equal(7);
+        });
+    });
+    it("must support kill child",function(){
+        //no tests just killing possible lost pids;
+        child.kill();
     });
 });

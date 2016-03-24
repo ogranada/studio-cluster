@@ -16,6 +16,10 @@ Studio.module('basic')(function sum(a,b){
     return a+b;
 });
 
+Studio.module('basic')(function dualCommunication(a){
+    return Studio.module('basic')('senderSum')(a);
+});
+
 Studio.module('cancel')(function delayed(time){
     return Studio.promise.delay(time).then(function(){
         process.exit(1);
