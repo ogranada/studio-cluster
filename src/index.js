@@ -12,7 +12,7 @@ var DISCOVER_SERVICES_MESSAGE = constants.DISCOVER_SERVICES_MESSAGE;
 var removeServices = function(url,port){
     var k;
     var filterByUrlAndPort = function(info){
-        return info.url !== url && info.port !== port;
+        return info.url !== url || info.port !== port;
     };
     for(k in remoteServices){
         remoteServices[k] = remoteServices[k].filter(filterByUrlAndPort);
@@ -35,6 +35,9 @@ var clusterPlugin = function(configuration){
             }
             msg.id.forEach(function(_id){
                 remoteServices[_id] = remoteServices[_id] || [];
+                remoteServices[_id] = remoteServices[_id].filter(function(info){
+                    return info.url !== msg.address || info.port !== msg.port;
+                });
                 remoteServices[_id].push({url:msg.address,port:msg.port});
             });
         });
@@ -45,7 +48,7 @@ var clusterPlugin = function(configuration){
             msg.id.forEach(function(_id){
                 remoteServices[_id] = remoteServices[_id] || [];
                 remoteServices[_id]=remoteServices[_id].filter(function(info){
-                    return info.url !== msg.address && info.port !== msg.port;
+                    return info.url !== msg.address || info.port !== msg.port;
                 });
             });
         });

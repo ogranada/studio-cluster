@@ -30,7 +30,6 @@ var _connect = function(Studio,url,port){
         clientPromise = new Studio.promise(function(resolve,reject){
             var client = new WebSocketClient();
             client.on('connectFailed', function(error){
-                connections[url+':'+port] = null;
                 if(_self.disconnectFunction){
                     _self.disconnectFunction(url,port);
                 }
@@ -39,7 +38,6 @@ var _connect = function(Studio,url,port){
             });
             client.on('connect', function (connection){
                 connection.on('error', function(error){
-                    connections[url+':'+port] = null;
                     if(_self.disconnectFunction){
                         _self.disconnectFunction(url,port);
                     }
