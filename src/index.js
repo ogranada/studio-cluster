@@ -24,9 +24,10 @@ var removeServices = function(url,port){
 var clusterPlugin = function(configuration){
     return function(opt,Studio){
         configuration = configuration || {};
-        var rpcPort = configuration.rpcPort || 10120;
-        var publisher = configuration.publisher || require('./publisher/broadcast');
-        var startPromise = publisher.start(Studio,{rpcPort:rpcPort});
+        configuration.rpcPort = configuration.rpcPort || 10120;
+        var rpcPort = configuration.rpcPort;
+        var publisher = configuration.publisher || clusterPlugin.publisher.broadcast;
+        var startPromise = publisher.start(Studio,configuration);
 
         publisher.sendMessage(DISCOVER_SERVICES_MESSAGE);
         publisher.on(START_SERVICE_MESSAGE,function(msg){
@@ -92,6 +93,7 @@ var clusterPlugin = function(configuration){
 };
 
 clusterPlugin.publisher={
-  broadcast : require('./publisher/broadcast')
+  broadcast : require('./publisher/broadcast'),
+  redis : require('./publisher/redis')
 };
 module.exports = clusterPlugin;
