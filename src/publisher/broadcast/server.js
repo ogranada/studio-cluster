@@ -47,7 +47,7 @@ broadcastEmitter.start = function (Studio, opt) {
                         address = rinfo.address;
                         resolve(client);
                     }else if(rinfo.address !==address || msg.port !== rpcPort){ //localhost
-                        msg.address = address;
+                        msg.address = rinfo.address;
                         broadcastEmitter.emit(msg.action,msg);
                     }
                 }catch(err){
