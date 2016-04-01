@@ -2,6 +2,9 @@ var EventEmitter = require("events").EventEmitter;
 var publicIp = require('public-ip');
 var Redis = require('ioredis');
 
+var uuid = require('node-uuid');
+var publisherId = uuid.v4();
+
 var started = null;
 var rpcPort=null;
 var myIp = null;
@@ -11,6 +14,7 @@ var redisEmitter = new EventEmitter();
 
 var sendMessage =function(action,id,redis){
     var message = JSON.stringify({
+        _publisherId:publisherId,
         address : myIp,
         port : rpcPort,
         id : id,
@@ -44,7 +48,7 @@ redisEmitter.start = function (Studio, opt) {
             redisPublisher.on('message',function(channel,msg){
                 try{
                     msg = JSON.parse(msg);
-                    if(msg.address !== myIp || msg.port !== rpcPort){ //localhost
+                    if(msg._publisherId !== publisherId){ //localhost
                         msg.address = myIp;
                         redisEmitter.emit(msg.action,msg);
                     }
