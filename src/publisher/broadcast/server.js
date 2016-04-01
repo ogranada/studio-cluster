@@ -2,7 +2,7 @@ var dgram = require('dgram');
 var client = dgram.createSocket({type:'udp4',reuseAddr:true});
 var EventEmitter = require("events").EventEmitter;
 var uuid = require('node-uuid');
-var id = uuid.v4();
+var publisherId = uuid.v4();
 
 var started = null;
 var broadcastPort=null;
@@ -13,6 +13,7 @@ var broadcastEmitter = new EventEmitter();
 
 var sendMessage =function(action,id,server){
     var message = JSON.stringify({
+        _publisherId:publisherId,
         port : rpcPort,
         id : id,
         action : action
@@ -29,10 +30,7 @@ broadcastEmitter.start = function (Studio, opt) {
         started = new Studio.promise(function (resolve, reject) {
             client.bind({port: broadcastPort, exclusive: false}, function () {
                 client.setBroadcast(true);
-                var strId = JSON.stringify(id);
-                //broadcasting a msg with my id so i can discover my local ip address
-                //more reliable than check each networkInterface
-                client.send(strId,0,strId.length, broadcastPort, BROADCAST_IP);
+                resolve(client);
             });
             client.on('error', function (error) {
                 broadcastEmitter.emit("error",error);
@@ -42,11 +40,7 @@ broadcastEmitter.start = function (Studio, opt) {
             client.on("message",function(msg,rinfo){
                 try{
                     msg = JSON.parse(msg);
-                    if(msg ===id){
-                        //receiving broadcast msg with my id now i know my address
-                        address = rinfo.address;
-                        resolve(client);
-                    }else if(rinfo.address !==address || msg.port !== rpcPort){ //localhost
+                    if(msg._publisherId !== publisherId){ //localhost
                         msg.address = rinfo.address;
                         broadcastEmitter.emit(msg.action,msg);
                     }
