@@ -33,7 +33,6 @@ describe("Broadcast publisher",function(){
     });
     it("must be able to receive START_SERVICE_MESSAGE",function(){
         delete require.cache[path.join(__dirname,'../src/publisher/broadcast/index.js')];
-        delete require.cache[path.join(__dirname,'../src/publisher/broadcast/localIp.js')];
         delete require.cache[path.join(__dirname,'../src/publisher/broadcast/server.js')];
         delete require.cache[path.join(__dirname,'../src/index.js')];
         otherBroadcast = require('../src').publisher.broadcast;
