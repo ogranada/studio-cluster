@@ -10,7 +10,7 @@ var server = http.createServer(function (request, response){
     response.end();
 });
 var connections = {};
-
+//TODO usar primus com websocket (pra ter reconnect para lidar com falha na conexão)
 var generateId = function(){
     return uuid.v4();
 };
