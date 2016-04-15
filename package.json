@@ -55,10 +55,11 @@
     "studio": "^0.11.10"
   },
   "dependencies": {
-    "node-uuid": "^1.4.7",
     "ioredis": "^1.15.1",
+    "node-uuid": "^1.4.7",
+    "primus": "5.0.1",
     "public-ip": "^1.2.0",
     "serialize-error": "^1.1.0",
-    "websocket": "^1.0.22"
+    "ws": "^1.0.1"
   }
 }

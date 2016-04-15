@@ -1,38 +1,54 @@
 var EventEmitter = require("events").EventEmitter;
 var publicIp = require('public-ip');
 var Redis = require('ioredis');
-
+var util = require('util');
 var uuid = require('node-uuid');
-var publisherId = uuid.v4();
 
-var started = null;
-var rpcPort=null;
+
+var redisSender,redisSubscriber,started = null;
 var myIp = null;
 var CHANNEL_NAME = '__studio_service_discovery';
 
+
+
+
 var redisEmitter = new EventEmitter();
 
-var sendMessage =function(action,id,redis){
+
+
+function StudioRedisEmitter(opt){
+    this.id = uuid.v4();
+    this.sender = opt.sender;
+    this.rpcPort = opt.rpcPort;
+    this.subscriber = opt.subscriber;
+}
+util.inherits(StudioRedisEmitter,EventEmitter);
+
+StudioRedisEmitter.prototype.send = function(action,info){
     var message = JSON.stringify({
-        _publisherId:publisherId,
+        _publisherId:this.id,
         address : myIp,
-        port : rpcPort,
-        id : id,
+        port : this.rpcPort,
+        id : info,
         action : action
     });
-    redis.publish(CHANNEL_NAME,message);
+    redisSender.publish(CHANNEL_NAME,message);
 };
 
 
-redisEmitter.start = function (Studio, opt) {
-    var redis;
-    if (!started) {
+module.exports = function (rpcPort, opt) {
+    return function(Studio){
+        var redis;
         opt = opt || {};
-        redisPublisher = new Redis(opt.redis);
-        redisSender = new Redis(opt.redis);
-        rpcPort = opt.rpcPort;
-        started = new Studio.promise(function (resolve, reject) {
-            redisPublisher.subscribe(CHANNEL_NAME,function(err){
+        redisSubscriber = new Redis(opt);
+        redisSender = new Redis(opt);
+        var instance = new StudioRedisEmitter({
+            sender:redisSender,
+            subscriber:redisSubscriber,
+            rpcPort:rpcPort
+        });
+        return new Studio.promise(function (resolve, reject) {
+            instance.subscriber.subscribe(CHANNEL_NAME,function(err){
                 if(err){
                     return reject(err);
                 }
@@ -41,27 +57,21 @@ redisEmitter.start = function (Studio, opt) {
                         return reject(err);
                     }
                     myIp = ip;
-                    resolve(redisSender);
+                    resolve(instance);
                 });
             });
-            redisPublisher.on('error',reject);
-            redisPublisher.on('message',function(channel,msg){
+            redisSubscriber.on('error',reject);
+            redisSubscriber.on('message',function(channel,msg){
                 try{
                     msg = JSON.parse(msg);
-                    if(msg._publisherId !== publisherId){ //localhost
+                    if(msg._publisherId !== instance.id){ //localhost
                         msg.address = myIp;
-                        redisEmitter.emit(msg.action,msg);
+                        instance.emit(msg.action,msg);
                     }
                 }catch(err){
                     // nothing to do... ignore message
                 }
             });
         });
-    }
-    return started;
+    };
 };
-
-redisEmitter.sendMessage = function(action,info){
-    return started.then(sendMessage.bind(null,action,info));
-};
-module.exports = redisEmitter;

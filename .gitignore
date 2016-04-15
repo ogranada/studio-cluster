@@ -4,3 +4,5 @@ node_modules/
 .coverage/
 test1.js
 test2.js
+
+testMerge.js

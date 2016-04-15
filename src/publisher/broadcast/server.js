@@ -1,59 +1,59 @@
 var dgram = require('dgram');
-var client = dgram.createSocket({type:'udp4',reuseAddr:true});
+var util = require('util');
 var EventEmitter = require("events").EventEmitter;
 var uuid = require('node-uuid');
-var publisherId = uuid.v4();
 
-var started = null;
-var broadcastPort=null;
-var rpcPort=null;
 var BROADCAST_IP = "255.255.255.255";
 
-var broadcastEmitter = new EventEmitter();
+function BroadcastEmitter(opt){
+    this.id = uuid.v4();
+    this.client = opt.client;
+    this.rpcPort = opt.rpcPort;
+    this.broadcastPort = opt.broadcastPort;
+}
+util.inherits(BroadcastEmitter,EventEmitter);
 
-var sendMessage =function(action,id,server){
+BroadcastEmitter.prototype.send = function(action,info){
     var message = JSON.stringify({
-        _publisherId:publisherId,
-        port : rpcPort,
-        id : id,
+        _publisherId:this.id,
+        port : this.rpcPort,
+        id : info,
         action : action
     });
-    server.send(message,0,message.length, broadcastPort, BROADCAST_IP);
+    this.client.send(message,0,message.length, this.broadcastPort, BROADCAST_IP);
 };
 
+module.exports = function (rpcPort, opt) {
+    return function(Studio){
+        var client = dgram.createSocket({type:'udp4',reuseAddr:true});
+        var broadcastPort = opt && opt.broadcastPort || 10121;
+        var instance = new BroadcastEmitter({
+            rpcPort : rpcPort,
+            client:client,
+            broadcastPort: broadcastPort
+        });
 
-broadcastEmitter.start = function (Studio, opt) {
-    if (!started) {
-        opt = opt || {};
-        broadcastPort = opt.broadcastPort || 10121;
-        rpcPort = opt.rpcPort;
-        started = new Studio.promise(function (resolve, reject) {
+        return new Studio.promise(function (resolve, reject) {
             client.bind({port: broadcastPort, exclusive: false}, function () {
                 client.setBroadcast(true);
-                resolve(client);
+                resolve(instance);
             });
             client.on('error', function (error) {
-                broadcastEmitter.emit("error",error);
+                instance.emit("error",error);
                 client.close();
                 reject(error);
             });
             client.on("message",function(msg,rinfo){
                 try{
                     msg = JSON.parse(msg);
-                    if(msg._publisherId !== publisherId){ //localhost
+                    if(msg._publisherId !== instance.id){ //localhost
                         msg.address = rinfo.address;
-                        broadcastEmitter.emit(msg.action,msg);
+                        instance.emit(msg.action,msg);
                     }
                 }catch(err){
                     // nothing to do... ignore message
                 }
             });
         });
-    }
-    return started;
+    };
 };
-
-broadcastEmitter.sendMessage = function(action,info){
-    return started.then(sendMessage.bind(null,action,info));
-};
-module.exports = broadcastEmitter;

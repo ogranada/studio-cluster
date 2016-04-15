@@ -1,8 +1,9 @@
 var localServices = require('./localServices');
 var remoteServices = require('./remoteServices');
-var defaultTransport = require('./wsTransport');
 var constants = require('./constants');
+var util = require('./util');
 
+var SYNC_SERVICE_MESSAGE = constants.SYNC_SERVICE_MESSAGE;
 var START_SERVICE_MESSAGE = constants.START_SERVICE_MESSAGE;
 var STOP_SERVICE_MESSAGE = constants.STOP_SERVICE_MESSAGE;
 var DISCOVER_SERVICES_MESSAGE = constants.DISCOVER_SERVICES_MESSAGE;
@@ -14,73 +15,131 @@ var removeServices = function(url,port){
     var filterByUrlAndPort = function(info){
         return info.url !== url || info.port !== port;
     };
-    for(k in remoteServices){
+    Object.keys(remoteServices).forEach(function(k){
         remoteServices[k] = remoteServices[k].filter(filterByUrlAndPort);
-    }
+    });
+    servicesByUrlPort[url+':'+port]=null;
 };
 
+var servicesByUrlPort={};
 
 
 var clusterPlugin = function(configuration){
-    return function(opt,Studio){
+    return function(serviceListener,Studio){
+        var prioritizeLocal,rpcPort,syncInterval;
         configuration = configuration || {};
-        configuration.rpcPort = configuration.rpcPort || 10120;
-        var rpcPort = configuration.rpcPort;
-        var publisher = configuration.publisher || clusterPlugin.publisher.broadcast;
-        var startPromise = publisher.start(Studio,configuration);
+        rpcPort = configuration.rpcPort || 10120;
+        syncInterval = (+configuration.syncInterval >0)? +configuration.syncInterval : 30*60*1000;
+        prioritizeLocal = configuration.prioritizeLocal === false ? false : true;
+        var startPromise = configuration.publisher || clusterPlugin.publisher.broadcast(rpcPort);
+        var transport = configuration.transport || clusterPlugin.transport.primus(rpcPort);
+        startPromise = startPromise(Studio);
+        transport = transport(Studio);
+        startPromise.then(function(publisher){
 
-        publisher.sendMessage(DISCOVER_SERVICES_MESSAGE);
-        publisher.on(START_SERVICE_MESSAGE,function(msg){
-            if(!(msg.id instanceof Array)){
-                msg.id = [msg.id];
-            }
-            msg.id.forEach(function(_id){
+            publisher.send(DISCOVER_SERVICES_MESSAGE);
+            publisher.on(START_SERVICE_MESSAGE,function(msg){
+                var key;
+                if(!(msg.id instanceof Array)){
+                    msg.id = [msg.id];
+                }
+                msg.id.forEach(function(_id){
+                    remoteServices[_id] = remoteServices[_id] || [];
+                    remoteServices[_id] = remoteServices[_id].filter(function(info){
+                        return info.url !== msg.address || info.port !== msg.port;
+                    });
+                    remoteServices[_id].push({url:msg.address,port:msg.port});
+                });
+                key = msg.address+':'+msg.port;
+                servicesByUrlPort[key] = servicesByUrlPort[key] || [];
+                servicesByUrlPort[key] = msg.id.concat(servicesByUrlPort[key]);
+                servicesByUrlPort[key] = util.uniq(servicesByUrlPort[key]);
+            });
+            publisher.on(STOP_SERVICE_MESSAGE,function(msg){
+                var key;
+                if(!(msg.id instanceof Array)){
+                    msg.id = [msg.id];
+                }
+                key = msg.address+':'+msg.port;
+                msg.id.forEach(function(_id){
+                    remoteServices[_id] = remoteServices[_id] || [];
+                    remoteServices[_id]=remoteServices[_id].filter(function(info){
+                        return info.url !== msg.address || info.port !== msg.port;
+                    });
+                    servicesByUrlPort[key] = (servicesByUrlPort[key] || []).filter(function(v){
+                        return v !== _id;
+                    });
+                });
+            });
+            publisher.on(DISCOVER_SERVICES_MESSAGE,function(msg){
+                var ids = Object.keys(localServices).filter(function(id){return localServices[id];});
+                startPromise.then(function(){
+                    publisher.send(START_SERVICE_MESSAGE,ids);
+                });
+            });
+            publisher.on(SYNC_SERVICE_MESSAGE,function(msg){
+                var key;
+                key = msg.address+':'+msg.port;
+                servicesByUrlPort[key] = msg.id;
+                Object.keys(remoteServices).forEach(function(_id){
+                    remoteServices[_id] = remoteServices[_id].filter(function(info){
+                        return info.url !== msg.address || info.port !== msg.port;
+                    });
+                });
+                msg.id.forEach(function(_id){
+                    remoteServices[_id].push({url:msg.address,port:msg.port});
+                });
+            });
+        });
+        
+        if(syncInterval){
+            startPromise.then(function(publisher){
+                setInterval(function(){
+                    var ids = Object.keys(localServices).filter(function(id){return localServices[id];});
+                    publisher.send(SYNC_SERVICE_MESSAGE,ids);
+                },syncInterval);
+            });    
+        }
+        
+        serviceListener.onStart(function(serv){
+            localServices[serv.id] = true;
+            startPromise.then(function(publisher){
+                publisher.send(START_SERVICE_MESSAGE,serv.id);
+            });
+        });
+        serviceListener.onStop(function(serv){
+            localServices[serv.id] = false;
+            startPromise.then(function(publisher){
+                publisher.send(STOP_SERVICE_MESSAGE,serv.id);
+            });
+        });
+        transport.on('end',function(obj){
+            removeServices(obj.url,obj.port);
+        });
+        transport.on('close',function(obj){
+            var tmp = servicesByUrlPort[obj.url+':'+obj.port];
+            removeServices(obj.url,obj.port);
+            servicesByUrlPort[obj.url+':'+obj.port] = tmp;
+        });
+        transport.on('reconnected',function(obj){
+            (servicesByUrlPort[obj.url+':'+obj.port] || []).forEach(function(_id){
                 remoteServices[_id] = remoteServices[_id] || [];
                 remoteServices[_id] = remoteServices[_id].filter(function(info){
-                    return info.url !== msg.address || info.port !== msg.port;
+                    return info.url !== obj.url || info.port !== obj.port;
                 });
-                remoteServices[_id].push({url:msg.address,port:msg.port});
+                remoteServices[_id].push({url:obj.url,port:obj.port});
             });
         });
-        publisher.on(STOP_SERVICE_MESSAGE,function(msg){
-            if(!(msg.id instanceof Array)){
-                msg.id = [msg.id];
-            }
-            msg.id.forEach(function(_id){
-                remoteServices[_id] = remoteServices[_id] || [];
-                remoteServices[_id]=remoteServices[_id].filter(function(info){
-                    return info.url !== msg.address || info.port !== msg.port;
-                });
-            });
-        });
-        publisher.on(DISCOVER_SERVICES_MESSAGE,function(msg){
-            var ids = Object.keys(localServices).filter(function(id){return localServices[id];});
-            publisher.sendMessage(START_SERVICE_MESSAGE,ids);
-        });
-        opt.onStart(function(serv){
-            localServices[serv.id] = true;
-            publisher.sendMessage(START_SERVICE_MESSAGE,serv.id);
-        });
-        opt.onStop(function(serv){
-            localServices[serv.id] = false;
-            publisher.sendMessage(STOP_SERVICE_MESSAGE,serv.id);
-        });
 
-        startPromise.then(function(server){
-            defaultTransport.start(Studio,rpcPort);
-        });
-        startPromise.then(function(){
-            defaultTransport.onDisconnect(removeServices);
-        });
-
-        opt.interceptSend(function(send,rec){
+        serviceListener.interceptSend(function(send,rec){
             return function(){
-                var idx;
-                if(localServices[rec] || !remoteServices[rec] || remoteServices[rec].length === 0 ){
+                var idx,useLocal;
+                useLocal = localServices[rec] && (prioritizeLocal || Math.floor(Math.random() * 2) ===1);
+                if(useLocal || !remoteServices[rec] || remoteServices[rec].length === 0 ){
                     return send.apply(this,arguments);
                 }else{
                     idx = Math.floor(Math.random() * remoteServices[rec].length);
-                    return defaultTransport.send(Studio,
+                    return transport.send(
                         remoteServices[rec][idx].url,
                         remoteServices[rec][idx].port,
                         Array.prototype.slice.call(arguments),
@@ -95,5 +154,8 @@ var clusterPlugin = function(configuration){
 clusterPlugin.publisher={
   broadcast : require('./publisher/broadcast'),
   redis : require('./publisher/redis')
+};
+clusterPlugin.transport={
+  primus : require('./transport/primus')
 };
 module.exports = clusterPlugin;
