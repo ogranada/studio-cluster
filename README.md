@@ -93,9 +93,9 @@ Process 2:
 ```js
 var Studio = require('studio');
 
-var studioCluster = require('studio-cluster');`
+var studioCluster = require('studio-cluster');
 Studio.use(studioCluster());
-// uncomment the line above if you dont have two machines to test, and just want to see two process in the same machine communicating
+//uncomment the line above if you dont have two machines to test, and just want to see two process in the same machine communicating
 //Studio.use(studioCluster({rpcPort:10199}));
 
 var test1 = Studio('test1');
