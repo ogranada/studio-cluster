@@ -1,6 +1,6 @@
 {
   "name": "studio-cluster",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "Cluster (rpc) plugin for studio",
   "author": {
     "name": "Erich Oliveira",
