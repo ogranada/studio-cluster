@@ -65,7 +65,6 @@ module.exports = function (rpcPort, opt) {
                 try{
                     msg = JSON.parse(msg);
                     if(msg._publisherId !== instance.id){ //localhost
-                        msg.address = myIp;
                         instance.emit(msg.action,msg);
                     }
                 }catch(err){
