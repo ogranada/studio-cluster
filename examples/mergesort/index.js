@@ -2,7 +2,7 @@ var Studio = require('studio');
 var studioCluster = require('../../src'); //require('studio-cluster'); on your projects
 
 //Initialize as above if you want several process in the same machine
-//var port = Math.floor(Math.random()*5000) + 5000;
+//var port = Math.floor(Math.random()*5000) + 5000;// just choosing a random port
 //Studio.use(studioCluster({rpcPort:port,prioritizeLocal:false}));
 
 //By default studioCluster prioritize local services when available, in this case, we want to call the same service in different process
@@ -47,5 +47,4 @@ setTimeout(function(){
 		console.log(res);
 	});	
 },1000);
-//Just keep the process running
-setInterval(function(){},10000);
+

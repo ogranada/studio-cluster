@@ -6,7 +6,3 @@ Studio.use(studioCluster());
 Studio(function sayHello(name){
     return 'Hello '+name;  
 });
-
-
-//Just keep the process running
-setInterval(function(){},10000);

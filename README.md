@@ -83,9 +83,6 @@ Studio(function test1(){
     return 'test';
 });
 
-
-//Just keep the process running
-setInterval(function(){},10000);
 ```
 
 Process 2:
@@ -108,10 +105,9 @@ Studio(function test2(){
     });
 });
 
+var _test2 =  Studio('test2');
 
-var test2 =  Studio('test2');
-
-setInterval(test2,1500);
+setInterval(_test2,1500);
 ```
 
 This is it... no boilerplate required we just added the line to require the plugin and one line to make Studio use it... is that simple,
@@ -122,11 +118,12 @@ is service communication with no boilerplate
 Examples
 ========
 
-Follow the link to see all available [examples](https://github.com/ericholiveira/studio-cluster/tree/master/examples/)
+The easiest way to run the examples is cloning this repo, executing npm install in the root folder and then exploring [examples](https://github.com/ericholiveira/studio-cluster/tree/master/examples/) folder to see and understand the basic examples
 
 Dependencies
 ========
-Studio depends on:
+Studio-cluster depends on:
+- [Studio](https://github.com/ericholiveira/studio)
 - [primus](https://github.com/primus/primus) default transport for rpc
 - [ws](https://github.com/websockets/ws) websocket implementation for rpc
 - [node-uuid](https://github.com/broofa/node-uuid) to create an id for the messages it uses internally
@@ -141,7 +138,7 @@ Build
 To build the project you have to run:
 
     npm install
-    npm run test
+    npm test
 
 This is going to install dependencies, lint and test the code
 
@@ -150,14 +147,14 @@ Test
 
 Run test with:
 
-    npm run test
+    npm test
 
 License
 ========
 
 The MIT License (MIT)
 
-Copyright (c) 2015 Erich Oliveira [ericholiveira.com](http://ericholiveira.com)
+Copyright (c) 2016 Erich Oliveira [ericholiveira.com](http://ericholiveira.com)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

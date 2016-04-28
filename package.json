@@ -28,9 +28,6 @@
     "type": "git",
     "url": "https://github.com/ericholiveira/studio-cluster.git"
   },
-  "peerDependencies": {
-    "studio": "^0.12.1"
-  },
   "main": "./src/index.js",
   "readmeFilename": "README.md",
   "devDependencies": {
@@ -51,8 +48,7 @@
     "grunt-jasmine-node-coverage": "0.2.0",
     "grunt-mocha-test": "^0.12.7",
     "grunt-release": "0.13.0",
-    "mocha": "^2.4.5",
-    "studio": "^0.11.10"
+    "mocha": "^2.4.5"
   },
   "dependencies": {
     "ioredis": "^1.15.1",
@@ -60,6 +56,7 @@
     "primus": "5.0.1",
     "public-ip": "^1.2.0",
     "serialize-error": "^1.1.0",
+    "studio": "^0.13.1",
     "ws": "^1.0.1"
   }
 }
