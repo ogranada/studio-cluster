@@ -1,13 +1,14 @@
 {
   "name": "studio-cluster",
-  "version": "0.1.1",
+  "version": "0.2.1",
   "description": "Cluster (rpc) plugin for studio",
   "author": {
     "name": "Erich Oliveira",
     "url": "http://ericholiveira.com"
   },
   "scripts": {
-    "test": "grunt all"
+    "test": "grunt all",
+    "prod": "grunt prod"
   },
   "keywords": [
     "functional",
@@ -21,7 +22,8 @@
     "studio",
     "cluster",
     "rpc",
-    "remote procedure call"
+    "remote procedure call",
+    "service discovery"
   ],
   "license": "MIT",
   "repository": {
