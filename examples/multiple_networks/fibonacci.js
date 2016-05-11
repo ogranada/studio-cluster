@@ -5,7 +5,7 @@ var port = 10120;// just choosing a random port
 //By default studioCluster prioritize local services when available, in this case, we want to call the same service in different process
 Studio.use(studioCluster({
     rpcPort:port,
-    prioritizeLocal:false,
+    balance: studioCluster.balance.random({ percentLocal: 0 }),
     publisher:studioCluster.publisher.redis(port,'YOUR_REDIS_ADDRESS')
 }));
 

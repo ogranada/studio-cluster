@@ -37,8 +37,15 @@ var clusterPlugin = function(configuration){
             prioritizeLocal = configuration.prioritizeLocal === false ? false : true;
             var startPromise = configuration.publisher || clusterPlugin.publisher.broadcast(rpcPort);
             var transport = configuration.transport || clusterPlugin.transport.primus(rpcPort);
+
+            // NOTE: To maintain compatibility with the previous implementation, prioritizeLocal will send 100% of the traffic
+            // to the local service be default.
+            var balance = configuration.balance || clusterPlugin.balance.random({ percentLocal: prioritizeLocal ? 100 : -1});
+
             startPromise = startPromise(Studio);
             transport = transport(Studio);
+            balance = balance(transport, Studio);
+
             startPromise.then(function(publisher){
 
                 publisher.send(DISCOVER_SERVICES_MESSAGE);
@@ -136,20 +143,8 @@ var clusterPlugin = function(configuration){
             });
 
             serviceListener.interceptSend(function(send,rec){
-                return function(){
-                    var idx,useLocal;
-                    useLocal = localServices[rec] && (prioritizeLocal || Math.floor(Math.random() * 2) ===1);
-                    if(useLocal || !remoteServices[rec] || remoteServices[rec].length === 0 ){
-                        return send.apply(this,arguments);
-                    }else{
-                        idx = Math.floor(Math.random() * remoteServices[rec].length);
-                        return transport.send(
-                            remoteServices[rec][idx].url,
-                            remoteServices[rec][idx].port,
-                            Array.prototype.slice.call(arguments),
-                            rec
-                        );
-                    }
+                return function() {
+                    return balance.send(send, rec, localServices, remoteServices, Array.prototype.slice.call(arguments));
                 };
             });
         };
@@ -162,5 +157,9 @@ clusterPlugin.publisher={
 };
 clusterPlugin.transport={
   primus : require('./transport/primus')
+};
+clusterPlugin.balance={
+    random : require('./balance/random'),
+    roundRobin: require('./balance/round-robin')
 };
 module.exports = clusterPlugin;
