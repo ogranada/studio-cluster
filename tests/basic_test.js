@@ -1,5 +1,4 @@
 var expect = require("chai").expect;
-var exec = require('child_process').exec;
 var Studio = require('studio');
 var cluster = require('../src');
 
@@ -21,7 +20,6 @@ describe("Basic Tests",function(){
             return res + a;
         });
     });
-    var child = exec('node ./tests/testOfBasicRemoteService.js');
 
     var senderService = Studio('sender');
     var senderWithErrorService = Studio('senderWithError');
@@ -29,7 +27,7 @@ describe("Basic Tests",function(){
 
 
     it("must run without error",function(){
-        return Studio.promise.delay(600).then(function(){
+        return Studio.promise.delay(1200).then(function(){
           return senderService();
         }).then(function(result){
             expect(result).to.equal('HELLO');
@@ -53,9 +51,5 @@ describe("Basic Tests",function(){
         return Studio('dualCommunication')(4).then(function(result){
             expect(result).to.equal(7);
         });
-    });
-    it("must support kill child",function(){
-        //no tests just killing possible lost pids;
-        child.kill();
     });
 });
