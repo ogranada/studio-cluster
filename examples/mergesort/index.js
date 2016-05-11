@@ -3,11 +3,11 @@ var studioCluster = require('../../src'); //require('studio-cluster'); on your p
 
 //Initialize as above if you want several process in the same machine
 //var port = Math.floor(Math.random()*5000) + 5000;// just choosing a random port
-//Studio.use(studioCluster({rpcPort:port, balance: studioCluster.balance.roundRobin({ percentLocal: 0 })}));
+//Studio.use(studioCluster({rpcPort:port, balance: studioCluster.balance.roundRobin({ percentLocal: 50 })}));
 
 //By default studioCluster prioritize local services when available, in this case, we want to call the same service in different process
 //The roundRobin load balancing module will attempt to split the work evenly between all remote services.
-Studio.use(studioCluster({balance: studioCluster.balance.roundRobin({ percentLocal: 0 })}));
+Studio.use(studioCluster({balance: studioCluster.balance.roundRobin({ percentLocal: 50 })}));
 
 var _mergeSort = Studio('mergeSort');
 var _merge = Studio('merge');
