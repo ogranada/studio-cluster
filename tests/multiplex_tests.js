@@ -53,7 +53,7 @@ describe("Multiplex Tests", function () {
                 
                 return true;
             }
-        }
+        };
     });
 
     it("should multiplex local & remote routes", function () {
