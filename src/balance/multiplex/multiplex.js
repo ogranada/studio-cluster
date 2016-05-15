@@ -19,6 +19,7 @@ function Multiplex(configuration, Studio) {
     this.routes = configuration.routes || [];
     this.passThrough = configuration.passThrough || new Random({ prioritizeLocal: 100 })(transport, Studio);
     this.transport = configuration.transport;
+    this._studio = Studio;
 }
 
 /**
@@ -52,7 +53,7 @@ Multiplex.prototype.send = function(send, rec, localServices, remoteServices, pa
             }
         }
 
-        return responses;
+        return this._studio.promise.all(responses);
     } else {
         return this.passThrough.send(send, rec, localServices, remoteServices, payload);
     }
