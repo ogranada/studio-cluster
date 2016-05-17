@@ -4,16 +4,20 @@ var util = require('util');
 var EventEmitter = require("events").EventEmitter;
 var uuid = require('node-uuid');
 
-
-
-
 var generateId = function(){
+    'use strict';
+
     return uuid.v4();
 };
+
 function PrimusTransport(port,serverOpt,clientOpt,Studio){
+    'use strict';
+
 	var refs = {};
 	serverOpt = serverOpt || {};
 	serverOpt.port = port;
+    serverOpt.https = function () { this.isSecure = true; };
+    serverOpt.http = function () { this.isSecure = false; };
 	this._Studio = Studio;
 	this._clientOpt = clientOpt;
 	this._connections = {};
@@ -38,7 +42,8 @@ PrimusTransport.prototype._connect = function(url,port){
 	var address = url+':'+port;
 	if(!this._connections[address]){
 		this._connections[address] = new this._Studio.promise(function(resolve,reject){
-            var client = new _self._server.Socket(url+":"+port,_self.clientOpt);
+            var scheme = _self.isSecure ? 'wss://' : 'ws://';
+            var client = new _self._server.Socket(scheme+url+":"+port,_self._clientOpt);
             client.on('open', function(){resolve(client);});
             client.on('timeout',reject);
             client.on('end',function(){_self.emit('end',{url:url,port:port});});
@@ -69,11 +74,13 @@ PrimusTransport.prototype._connect = function(url,port){
 	}
 };
 PrimusTransport.prototype.send = function(url,port,params,receiver){
-	var clientPromise;
+    'use strict';
+
 	var address = url+':'+port;
 	var _self = this;
 	this._connect(url,port);
-	return this._connections[address].then(function(client){
+
+    return this._connections[address].then(function(client){
 	    var id = generateId();
 	    var _resolve , _reject;
 	    var promise = new _self._Studio.promise(function(resolve,reject) {
@@ -89,6 +96,8 @@ PrimusTransport.prototype.send = function(url,port,params,receiver){
 	});
 };
 module.exports = function(rpcPort, options){
+	'use strict';
+
 	return function(Studio){
 		var server = options && options.server;
 		var client = options && options.client;
