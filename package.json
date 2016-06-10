@@ -7,7 +7,7 @@
     "url": "http://ericholiveira.com"
   },
   "scripts": {
-    "test": "(node ./tests/testOfBasicRemoteService.js &) && (sleep 5) && grunt all",
+    "test": "(node ./tests/testOfBasicRemoteRedis.js &) && (node ./tests/testOfBasicRemoteService.js &) && (sleep 5) && grunt all",
     "prod": "grunt prod"
   },
   "keywords": [

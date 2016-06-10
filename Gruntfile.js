@@ -44,12 +44,19 @@ grunt.initConfig({
 			},
 			src: ['tests/cancel_test.js']
 		},
+		testRedis: {
+			options: {
+				reporter: 'spec',
+				clearRequireCache:true
+			},
+			src: ['tests/basic_redis_test.js']
+		},
 		testAll: {
 			options: {
 				reporter: 'spec',
 				clearRequireCache:true
 			},
-			src: ['tests/**/*_test.js','!tests/cancel_test.js','!tests/basic_test.js']
+			src: ['tests/**/*_test.js','!tests/cancel_test.js','!tests/basic_test.js', '!tests/basic_redis_test.js']
 		},
 		cov: {
 			options: {
@@ -65,12 +72,19 @@ grunt.initConfig({
 			},
 			src: ['.coverage/tests/cancel_test.js']
 		},
+		covRedis: {
+			options: {
+				reporter: 'spec',
+				clearRequireCache:true
+			},
+			src: ['.coverage/tests/basic_redis_test.js']
+		},
 		covAll: {
 			options: {
 				reporter: 'spec',
 				clearRequireCache:true
 			},
-			src: ['.coverage/tests/**/*_test.js','!.coverage/tests/cancel_test.js','!.coverage/tests/basic_test.js']
+			src: ['.coverage/tests/**/*_test.js','!.coverage/tests/cancel_test.js','!.coverage/tests/basic_test.js','!.coverage/tests/basic_redis_test.js']
 		}
 	},
 	storeCoverage: {
@@ -95,9 +109,9 @@ grunt.initConfig({
 	}
 
 });
-grunt.registerTask("cov-test", [ "instrument","mochaTest:cov","mochaTest:covCancel","mochaTest:covAll", 'storeCoverage',
+grunt.registerTask("cov-test", [ "instrument","mochaTest:cov","mochaTest:covCancel","mochaTest:covAll", "mochaTest:covRedis",'storeCoverage',
 	'makeReport']);
-grunt.registerTask("test", ["mochaTest:test","mochaTest:testCancel","mochaTest:testAll"]);
+grunt.registerTask("test", ["mochaTest:test","mochaTest:testCancel","mochaTest:testAll","mochaTest:testRedis"]);
 grunt.registerTask("coverage", ["jshint","cov-test"]);
 grunt.registerTask("all", ["jshint", "test"]);
 grunt.registerTask("default", ["all", "watch"]);

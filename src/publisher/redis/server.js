@@ -36,7 +36,7 @@ StudioRedisEmitter.prototype.send = function(action,info){
 };
 
 
-module.exports = function (rpcPort, opt) {
+module.exports = function (rpcPort, opt, forceLocal) {
     return function(Studio){
         var redis;
         opt = opt || {};
@@ -52,13 +52,18 @@ module.exports = function (rpcPort, opt) {
                 if(err){
                     return reject(err);
                 }
-                publicIp.v4(function (err, ip) {
-                    if(err){
-                        return reject(err);
-                    }
-                    myIp = ip;
+                if(forceLocal){
+                    myIp = '127.0.0.1';
                     resolve(instance);
-                });
+                }else{
+                    publicIp.v4(function (err, ip) {
+                        if(err){
+                            return reject(err);
+                        }
+                        myIp = ip;
+                        resolve(instance);
+                    });
+                }
             });
             redisSubscriber.on('error',reject);
             redisSubscriber.on('message',function(channel,msg){
