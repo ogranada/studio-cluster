@@ -27,6 +27,7 @@ describe("Basic Tests",function(){
 
 
     it("must run without error",function(){
+        this.timeout(5000);
         return Studio.promise.delay(1200).then(function(){
           return senderService();
         }).then(function(result){

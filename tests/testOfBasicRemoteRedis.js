@@ -4,7 +4,9 @@ cluster = require('../src');
 rpcPort = 10130;
 Studio.use(cluster({
 	rpcPort:rpcPort,
-	publisher:cluster.publisher.redis(rpcPort, '127.0.0.1',true)
+	publisher:cluster.publisher.redis(rpcPort, '127.0.0.1',{getIp:function(){
+        return '127.0.0.1';
+    }})
 }));
 
 Studio.module('basic_redis')(function receiver(){

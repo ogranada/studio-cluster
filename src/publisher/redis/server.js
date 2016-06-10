@@ -9,12 +9,7 @@ var redisSender,redisSubscriber,started = null;
 var myIp = null;
 var CHANNEL_NAME = '__studio_service_discovery';
 
-
-
-
 var redisEmitter = new EventEmitter();
-
-
 
 function StudioRedisEmitter(opt){
     this.id = uuid.v4();
@@ -36,10 +31,12 @@ StudioRedisEmitter.prototype.send = function(action,info){
 };
 
 
-module.exports = function (rpcPort, opt, forceLocal) {
+module.exports = function (rpcPort, opt, pluginOpt) {
     return function(Studio){
-        var redis;
+        var redis,getIp;
         opt = opt || {};
+        pluginOpt = pluginOpt || {};
+        getIp = pluginOpt.getIp? Studio.promise.method(pluginOpt.getIp): Studio.promise.promisify(publicIp.v4);
         redisSubscriber = new Redis(opt);
         redisSender = new Redis(opt);
         var instance = new StudioRedisEmitter({
@@ -52,18 +49,10 @@ module.exports = function (rpcPort, opt, forceLocal) {
                 if(err){
                     return reject(err);
                 }
-                if(forceLocal){
-                    myIp = '127.0.0.1';
+                getIp().then(function(ip){
+                    myIp = ip;
                     resolve(instance);
-                }else{
-                    publicIp.v4(function (err, ip) {
-                        if(err){
-                            return reject(err);
-                        }
-                        myIp = ip;
-                        resolve(instance);
-                    });
-                }
+                }).catch(reject);
             });
             redisSubscriber.on('error',reject);
             redisSubscriber.on('message',function(channel,msg){
