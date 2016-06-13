@@ -17,8 +17,8 @@ function Multiplex(configuration, Studio) {
     'use strict';
 
     this.routes = configuration.routes || [];
-    this.passThrough = configuration.passThrough || new Random({ prioritizeLocal: 100 })(transport, Studio);
     this.transport = configuration.transport;
+    this.passThrough = configuration.passThrough || new Random({ prioritizeLocal: 100 })(this.transport, Studio);
     this._studio = Studio;
 }
 

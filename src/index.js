@@ -160,6 +160,7 @@ clusterPlugin.transport={
 };
 clusterPlugin.balance={
     random : require('./balance/random'),
+    multiplex : require('./balance/multiplex'),
     roundRobin: require('./balance/round-robin')
 };
 module.exports = clusterPlugin;
