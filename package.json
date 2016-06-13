@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "(node ./tests/testOfBasicRemoteRedis.js &) && (node ./tests/testOfBasicRemoteService.js &) && (sleep 5) && grunt all",
-    "prod": "grunt prod"
+    "prod": "(node ./tests/testOfBasicRemoteRedis.js &) && (node ./tests/testOfBasicRemoteService.js &) && (sleep 5) && grunt prod"
   },
   "keywords": [
     "functional",
