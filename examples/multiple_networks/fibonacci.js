@@ -8,6 +8,15 @@ Studio.use(studioCluster({
     balance: studioCluster.balance.random({ percentLocal: 50 }),
     publisher:studioCluster.publisher.redis(port,'YOUR_REDIS_ADDRESS')
 }));
+/*
+//If running on local machine , you need to add a getIp option to redis publisher
+Studio.use(studioCluster({
+    rpcPort:port,
+    balance: studioCluster.balance.random({ percentLocal: 50 }),
+    publisher:studioCluster.publisher.redis(port,'YOUR_REDIS_ADDRESS',{getIp:function(){
+        return '127.0.0.1';
+    }})
+}));*/
 
 var _fib = Studio('fibonacci');
 
