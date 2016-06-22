@@ -1,35 +1,40 @@
 var dgram = require('dgram');
 var util = require('util');
 var EventEmitter = require("events").EventEmitter;
-var uuid = require('node-uuid');
 
 var BROADCAST_IP = "255.255.255.255";
 
-function BroadcastEmitter(opt){
-    this.id = uuid.v4();
+function BroadcastEmitter(instanceId, opt){
+    'use strict';
+    
+    this.id = instanceId;
     this.client = opt.client;
     this.rpcPort = opt.rpcPort;
     this.broadcastPort = opt.broadcastPort;
 }
+
 util.inherits(BroadcastEmitter,EventEmitter);
 
 BroadcastEmitter.prototype.send = function(action,info){
+    'use strict';
+
     var message = JSON.stringify({
         _publisherId:this.id,
         port : this.rpcPort,
         id : info,
         action : action
     });
+
     this.client.send(message,0,message.length, this.broadcastPort, BROADCAST_IP);
 };
 
 module.exports = function (rpcPort, opt) {
-    return function(Studio){
+    return function(instanceId, Studio){
         var client = dgram.createSocket({type:'udp4',reuseAddr:true});
         var broadcastPort = opt && opt.broadcastPort || 10121;
-        var instance = new BroadcastEmitter({
-            rpcPort : rpcPort,
-            client:client,
+        var instance = new BroadcastEmitter(instanceId, {
+            rpcPort: rpcPort,
+            client: client,
             broadcastPort: broadcastPort
         });
 

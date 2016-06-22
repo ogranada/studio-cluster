@@ -61,6 +61,7 @@ RoundRobin.prototype.send = function(send, rec, localServices, remoteServices, p
         return this.transport.send(
             remoteServices[rec][idx - 1].url,
             remoteServices[rec][idx - 1].port,
+            remoteServices[rec][idx - 1].id,
             payload,
             rec
         );

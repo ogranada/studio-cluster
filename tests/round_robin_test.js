@@ -26,7 +26,7 @@ describe("Round Robin Tests", function () {
         callCounter = [/* local */ 0, 0, 0, 0, /* test2 */0, 0];
 
         transportMock = {
-            send: function (url, port, params, receiver) {
+            send: function (url, port, id, params, receiver) {
                 expect(params).to.include('test');
 
                 callCounter[port] += 1;

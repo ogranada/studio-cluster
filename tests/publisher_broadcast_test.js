@@ -1,6 +1,6 @@
 var expect = require("chai").expect;
 var Studio = require('studio');
-var broadcastPromise = require('../src').publisher.broadcast(10000)(Studio);
+var broadcastPromise = require('../src').publisher.broadcast(10000)('123456', Studio);
 var broadcast;
 var otherBroadcast;
 var START_SERVICE_MESSAGE = require('../src/constants').START_SERVICE_MESSAGE;
@@ -35,7 +35,7 @@ describe("Broadcast publisher",function(){
         return broadcast.send(SYNC_SERVICE_MESSAGE,'');
     });
     it("must be able to receive START_SERVICE_MESSAGE",function(){
-        var otherBroadcastPromise = require('../src').publisher.broadcast(9999)(Studio);
+        var otherBroadcastPromise = require('../src').publisher.broadcast(9999)('654321', Studio);
         return otherBroadcastPromise.then(function(_otherBroadcast){
             otherBroadcast = _otherBroadcast;
             broadcast.send(START_SERVICE_MESSAGE,'foo');

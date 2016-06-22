@@ -1,12 +1,14 @@
 var expect = require("chai").expect;
 var Studio = require('studio');
 
-var primus = require('../src').transport.primus(9000)(Studio);
+var primus = require('../src').transport.primus(9000)('123456', Studio);
 
 var Primus = require('primus');
 
 var sendTestData;
 var server = Primus.createServer(function connection(spark) {
+    'use strict';
+
     spark.on('data', function(message) {
         sendTestData = message;
     });
@@ -21,7 +23,7 @@ describe("Primus transport",function(){
 
     it("must be able to send data",function(){
         //Catch to avoid unhandled rejectio after closing server in the next test
-        primus.send('127.0.0.1',9001,['foo'],'bar').catch(function(){});
+        primus.send('127.0.0.1',9001,'123456',['foo'],'bar').catch(function(){});
         return Studio.promise.delay(300).then(function(){
             var byPassLint= expect(sendTestData.i).to.exist;
             expect(sendTestData.p[0]).to.equal('foo');

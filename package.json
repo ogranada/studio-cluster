@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "ioredis": "^1.15.1",
+    "multicast-ipc": "^1.0.5",
     "node-uuid": "^1.4.7",
     "primus": "^5.2.1",
     "public-ip": "^1.2.0",

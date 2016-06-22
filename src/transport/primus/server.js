@@ -10,12 +10,13 @@ var generateId = function(){
     return uuid.v4();
 };
 
-function PrimusTransport(port,serverOpt,clientOpt,Studio){
+function PrimusTransport(instanceId,port,serverOpt,clientOpt,Studio){
     'use strict';
 
 	var refs = {};
 	serverOpt = serverOpt || {};
 	serverOpt.port = port;
+    serverOpt.instanceId = instanceId;
     serverOpt.https = function () { this.isSecure = true; };
     serverOpt.http = function () { this.isSecure = false; };
 	this._Studio = Studio;
@@ -23,6 +24,14 @@ function PrimusTransport(port,serverOpt,clientOpt,Studio){
 	this._connections = {};
 	this._server = Primus.createServer(function connection(spark) {
 		spark.on('data', function(message) {
+            if (spark.query.svc !== serverOpt.instanceId) {
+                var err = serializeError(new Error('Unauthorized'));
+
+                spark.write({ i: message.i, m: err, s: 0});
+
+                return;
+            }
+
   			if(message && message.r){
                 refs[message.r] = refs[message.r] || Studio(message.r); 
                 refs[message.r].apply(null,message.p).then(function(res){
@@ -37,20 +46,20 @@ function PrimusTransport(port,serverOpt,clientOpt,Studio){
 }
 util.inherits(PrimusTransport,EventEmitter);
 
-PrimusTransport.prototype._connect = function(url,port){
+PrimusTransport.prototype._connect = function(url,port,id){
 	var _self = this;
-	var address = url+':'+port;
+	var address = url+':'+port+'#'+id;
 	if(!this._connections[address]){
 		this._connections[address] = new this._Studio.promise(function(resolve,reject){
             var scheme = _self.isSecure ? 'wss://' : 'ws://';
-            var client = new _self._server.Socket(scheme+url+":"+port,_self._clientOpt);
+            var client = new _self._server.Socket(scheme+url+":"+port+"/?svc="+encodeURIComponent(id),_self._clientOpt);
             client.on('open', function(){resolve(client);});
             client.on('timeout',reject);
-            client.on('end',function(){_self.emit('end',{url:url,port:port});});
-            client.on('close',function(){_self.emit('close',{url:url,port:port});});
-            client.on('destroy',function(){_self.emit('end',{url:url,port:port});});
-            client.on('disconnect',function(){_self.emit('end',{url:url,port:port});});
-            client.on('reconnected',function(){_self.emit('reconnected',{url:url,port:port});});
+            client.on('end',function(){_self.emit('end',{url:url,port:port,id:id});});
+            client.on('close',function(){_self.emit('close',{url:url,port:port,id:id});});
+            client.on('destroy',function(){_self.emit('end',{url:url,port:port,id:id});});
+            client.on('disconnect',function(){_self.emit('end',{url:url,port:port,id:id});});
+            client.on('reconnected',function(){_self.emit('reconnected',{url:url,port:port,id:id});});
             client.on('close',function(){
             	// Reject all current promises, at this point we dont know if its going to be finished
 	            Object.keys(client._promises).forEach(function(k){
@@ -73,12 +82,12 @@ PrimusTransport.prototype._connect = function(url,port){
         });
 	}
 };
-PrimusTransport.prototype.send = function(url,port,params,receiver){
+PrimusTransport.prototype.send = function(url,port,id,params,receiver){
     'use strict';
 
-	var address = url+':'+port;
+	var address = url+':'+port+'#'+id;
 	var _self = this;
-	this._connect(url,port);
+	this._connect(url,port,id);
 
     return this._connections[address].then(function(client){
 	    var id = generateId();
@@ -98,10 +107,11 @@ PrimusTransport.prototype.send = function(url,port,params,receiver){
 module.exports = function(rpcPort, options){
 	'use strict';
 
-	return function(Studio){
+	return function(instanceId, Studio){
 		var server = options && options.server;
 		var client = options && options.client;
-		return new PrimusTransport(rpcPort,server, client, Studio);
+
+		return new PrimusTransport(instanceId, rpcPort, server, client, Studio);
 	};
 };
 

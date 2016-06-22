@@ -131,6 +131,7 @@ Studio-cluster depends on:
 - [public-ip](https://github.com/sindresorhus/public-ip) to discover the public ip when communicating outside of local network (redis transport)
 - [ioredis](https://github.com/luin/ioredis) when running multiple servers on multiple networks, you will need redis for service discovery this 
 plugin is used to communicate with redis
+- [multicast-ipc](https://github.com/avishnyak/multicast-ipc) used to communicate on the locahost for service discovery and rpc
 
 Build
 ========

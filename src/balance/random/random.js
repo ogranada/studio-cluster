@@ -48,6 +48,7 @@ Random.prototype.send = function(send, rec, localServices, remoteServices, paylo
         return this.transport.send(
             remoteServices[rec][idx].url,
             remoteServices[rec][idx].port,
+            remoteServices[rec][idx].id,
             payload,
             rec
         );

@@ -20,6 +20,10 @@ function Multiplex(configuration, Studio) {
     this.transport = configuration.transport;
     this.passThrough = configuration.passThrough || new Random({ prioritizeLocal: 100 })(this.transport, Studio);
     this._studio = Studio;
+
+    if (typeof this.passThrough === 'function') {
+        this.passThrough = this.passThrough(this.transport, Studio);
+    }
 }
 
 /**
@@ -47,6 +51,7 @@ Multiplex.prototype.send = function(send, rec, localServices, remoteServices, pa
                responses.push(this.transport.send(
                    remoteServices[rec][i].url,
                    remoteServices[rec][i].port,
+                   remoteServices[rec][i].id,
                    payload,
                    rec
                ));

@@ -25,7 +25,7 @@ describe("Multiplex Tests", function () {
         passThroughCounter = 0;
 
         transportMock = {
-            send: function (url, port, params, receiver) {
+            send: function (url, port, id, params, receiver) {
                 expect(params).to.include('test');
 
                 callCounter[port] += 1;
