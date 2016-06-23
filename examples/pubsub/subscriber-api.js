@@ -26,6 +26,7 @@ Studio(function billedApi(name) {
 
     console.log('Accessing number of shares for ' + name + ': 0');
 
+    // Erlich always has 0 shares.
     return {
         shares: 0
     };

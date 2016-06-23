@@ -40,14 +40,14 @@ function LocalhostTransport(port, serverOpt, clientOpt, Studio) {
 
                         refs[payload.r].apply(null, payload.p)
                             .then(function (res) {
-                                api.send(JSON.stringify({i: payload.i, m: res, s: 1}), payload.q, msg.address);
+                                api.send(JSON.stringify({i: payload.i, m: res, s: 1, to: payload.from, from: serverOpt.id}), payload.q, serverOpt.multicastAddress);
                             })
                             .catch(function (err) {
                                 err = serializeError(err);
 
-                                api.send(JSON.stringify({i: payload.i, m: err, s: 0}), payload.q, msg.address);
+                                api.send(JSON.stringify({i: payload.i, m: err, s: 0, to: payload.from, from: serverOpt.id}), payload.q, serverOpt.multicastAddress);
                             });
-                    } else if (payload && payload.i && self._promises[payload.i]) {
+                    } else if (payload && payload.i && self._promises[payload.i] && payload.to === serverOpt.id) {
                         func = payload.s ? self._promises[payload.i].resolve : self._promises[payload.i].reject;
                         delete self._promises[payload.i];
                         func(payload.m);
@@ -78,7 +78,7 @@ LocalhostTransport.prototype.send = function (url, port, id, params, receiver) {
         reject: _reject
     };
 
-    self.api.send(JSON.stringify({i: _id, p: params, r: receiver, q: self._serverOpt.port, to: id}), port, url);
+    self.api.send(JSON.stringify({i: _id, p: params, r: receiver, q: self._serverOpt.port, to: id, from: self._serverOpt.id}), port, url);
 
     return promise.timeout(self._clientOpt.timeout || 60000);
 };

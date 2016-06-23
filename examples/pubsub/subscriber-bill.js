@@ -29,6 +29,8 @@ Studio(function billedApi(name) {
     // We charge $0.05 per API access
     bills[name] = (bills[name] || 0) + 0.05;
 
+    console.log('%s\'s bill is now %d', name, bills[name]);
+
     return {
         bill: bills[name]
     };
