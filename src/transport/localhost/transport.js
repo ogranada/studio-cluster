@@ -80,7 +80,10 @@ LocalhostTransport.prototype.send = function (url, port, id, params, receiver) {
 
     self.api.send(JSON.stringify({i: _id, p: params, r: receiver, q: self._serverOpt.port, to: id, from: self._serverOpt.id}), port, url);
 
-    return promise.timeout(self._clientOpt.timeout || 60000);
+    return promise.timeout(self._clientOpt.timeout || 250).catch(self._Studio.promise.TimeoutError, function () {
+        // In case of timeout, we assume the service is unreachable
+        self.emit('end', { url: url, port: port, id: id});
+    });
 };
 
 module.exports = function (rpcPort, options) {
