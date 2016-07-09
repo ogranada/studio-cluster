@@ -77,10 +77,11 @@ LocalhostTransport.prototype.send = function (url, port, id, params, receiver) {
         resolve: _resolve,
         reject: _reject
     };
+    setTimeout(function(){
+        self.api.send(JSON.stringify({i: _id, p: params, r: receiver, q: self._serverOpt.port, to: id, from: self._serverOpt.id}), port, url);
+    },Math.floor(Math.random()*500));
 
-    self.api.send(JSON.stringify({i: _id, p: params, r: receiver, q: self._serverOpt.port, to: id, from: self._serverOpt.id}), port, url);
-
-    return promise.timeout(self._clientOpt.timeout || 250).catch(self._Studio.promise.TimeoutError, function () {
+    return promise.timeout(self._clientOpt.timeout || 5000).catch(self._Studio.promise.TimeoutError, function () {
         // In case of timeout, we assume the service is unreachable
         self.emit('end', { url: url, port: port, id: id});
     });

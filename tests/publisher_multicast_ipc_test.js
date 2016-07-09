@@ -1,6 +1,6 @@
 var expect = require("chai").expect;
 var Studio = require('studio');
-var multicastPromise = require('../src').publisher.localhost(10000)('123456', Studio);
+var multicastPromise = require('../src').publisher.localhost(10000,15100)('123456', Studio);
 var broadcast;
 var otherBroadcast;
 var START_SERVICE_MESSAGE = require('../src/constants').START_SERVICE_MESSAGE;
@@ -8,7 +8,7 @@ var STOP_SERVICE_MESSAGE = require('../src/constants').STOP_SERVICE_MESSAGE;
 var DISCOVER_SERVICES_MESSAGE = require('../src/constants').DISCOVER_SERVICES_MESSAGE;
 var SYNC_SERVICE_MESSAGE = require('../src/constants').SYNC_SERVICE_MESSAGE;
 
-describe("Broadcast publisher", function () {
+describe("Multicast publisher", function () {
     it("must returns a promise on execution", function () {
         expect(typeof multicastPromise.then).to.equal('function');
         expect(typeof multicastPromise.catch).to.equal('function');
@@ -38,16 +38,18 @@ describe("Broadcast publisher", function () {
     });
 
     it("must be able to send SYNC_SERVICE_MESSAGE", function () {
-        return broadcast.send(SYNC_SERVICE_MESSAGE, '');
+        this.timeout(4000);
+        return Studio.promise.resolve(broadcast.send(SYNC_SERVICE_MESSAGE, '')).then(function(){
+            return Studio.promise.delay(1000);// just wait 1 second while all broadcast messages from previous tests are send
+        });
     });
 
     it("must be able to receive START_SERVICE_MESSAGE", function () {
-        var otherBroadcastPromise = require('../src').publisher.localhost(10000)('654321', Studio);
+        var otherBroadcastPromise = require('../src').publisher.localhost(10000,15100)('654321', Studio);
 
         return otherBroadcastPromise.then(function (_otherBroadcast) {
             otherBroadcast = _otherBroadcast;
             broadcast.send(START_SERVICE_MESSAGE, 'foo');
-
             return new Studio.promise(function (resolve, reject) {
                 otherBroadcast.on("error", reject);
                 otherBroadcast.on(START_SERVICE_MESSAGE, function (msg) {

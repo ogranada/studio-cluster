@@ -84,15 +84,16 @@ util.inherits(MulticastEmitter, EventEmitter);
 
 MulticastEmitter.prototype.send = function(action, info) {
     'use strict';
-
+    var self = this;
     var message = JSON.stringify({
         _publisherId: this.id,
         port : this.rpcPort,
         id : info,
         action : action
     });
-
-    this.api.broadcast(message);
+    setTimeout(function(){
+      self.api.broadcast(message);
+    },Math.floor(Math.random()*500));
 };
 
 module.exports = function (rpcPort, opt) {
