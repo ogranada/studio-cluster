@@ -24,14 +24,6 @@ function PrimusTransport(instanceId,port,serverOpt,clientOpt,Studio){
 	this._connections = {};
 	this._server = Primus.createServer(function connection(spark) {
 		spark.on('data', function(message) {
-            if (spark.query.svc !== serverOpt.instanceId) {
-                var err = serializeError(new Error('Unauthorized'));
-
-                spark.write({ i: message.i, m: err, s: 0});
-
-                return;
-            }
-
   			if(message && message.r){
                 refs[message.r] = refs[message.r] || Studio(message.r); 
                 refs[message.r].apply(null,message.p).then(function(res){
