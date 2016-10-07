@@ -1,6 +1,8 @@
 var expect = require("chai").expect;
 var Studio = require('studio');
-var redisPromise = require('../src').publisher.redis(9996,'localhost')('123456', Studio);
+var redisPromise = require('../src').publisher.redis(9996,'localhost',{getIp:function(){
+    return '127.0.0.1';
+}})('123456', Studio);
 var redis;
 var otherRedis;
 var START_SERVICE_MESSAGE = require('../src/constants').START_SERVICE_MESSAGE;
@@ -36,7 +38,9 @@ describe("Redis publisher",function(){
         redis.send(SYNC_SERVICE_MESSAGE,'');
     });
     it("must be able to receive START_SERVICE_MESSAGE",function(){
-        return require('../src').publisher.redis(9997,'localhost')('654321', Studio).then(function(_otherRedis){
+        return require('../src').publisher.redis(9997,'localhost',{getIp:function(){
+            return '127.0.0.1';
+        }})('654321', Studio).then(function(_otherRedis){
             otherRedis = _otherRedis;
             redis.send(START_SERVICE_MESSAGE,'foo');
             return new Studio.promise(function(resolve,reject){
