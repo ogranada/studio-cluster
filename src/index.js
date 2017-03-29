@@ -207,7 +207,7 @@ var clusterPlugin = function(configuration){
             });
 
             serviceListener.interceptSend(function(send, rec){
-                logging.instance.log('Intercepting message');
+                logging.instance.log('Intercepting message: ' + rec);
                 return function() {
                     return balance.send(send, rec, localServices, remoteServices, Array.prototype.slice.call(arguments));
                 };
