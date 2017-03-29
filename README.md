@@ -24,7 +24,7 @@ Table of contents
 - [Intro](#intro)
 - [Getting Started](#getting-started)
 - [Examples](#examples)
-- [Examples](#logging)
+- [Logging](#logging)
 - [Dependencies](#dependencies)
 - [Build](#build)
 - [Test](#test)
