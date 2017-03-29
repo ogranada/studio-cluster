@@ -120,11 +120,14 @@ Logging
 
 Logs can be enabled via environment variable:
 
+```bash
 DEBUG="Studio-Cluster" node my-studio-app.js
+```
 or
-
+```bash
 export DEBUG="Studio-Cluster"
 node my-studio-app.js
+```
 
 
 Examples
