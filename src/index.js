@@ -87,7 +87,7 @@ var clusterPlugin = function(configuration){
                     }
 
                     msg.id.forEach(function (_id) {
-                        logging.instance.log('Registering remote service '+_id)
+                        logging.instance.log('Registering remote service ' + _id);
                         remoteServices[_id] = remoteServices[_id] || [];
 
                         remoteServices[_id] = remoteServices[_id].filter(function (info) {
@@ -110,7 +110,7 @@ var clusterPlugin = function(configuration){
                     if (!(msg.id instanceof Array)) {
                         msg.id = [msg.id];
                     }
-                    logging.instance.log('Removing remote service '+msg.id)
+                    logging.instance.log('Removing remote service ' + msg.id);
                     key = getServiceRegistryKey(msg.url, msg.port, msg._publisherId);
 
                     msg.id.forEach(function (_id) {
