@@ -115,6 +115,18 @@ take a look at the [helloworld example](https://github.com/ericholiveira/studio-
 check the other more complex examples available, but always keep in mind that it really doesnt matter what you plan to do, studio-cluster
 is service communication with no boilerplate
 
+Logging
+=======
+
+Logs can be enabled via environment variable:
+
+DEBUG="Studio-Cluster" node my-studio-app.js
+or
+
+export DEBUG="Studio-Cluster"
+node my-studio-app.js
+
+
 Examples
 ========
 

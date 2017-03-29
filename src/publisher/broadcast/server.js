@@ -1,3 +1,4 @@
+var logging = require('../../logging.js');
 var dgram = require('dgram');
 var util = require('util');
 var EventEmitter = require("events").EventEmitter;
